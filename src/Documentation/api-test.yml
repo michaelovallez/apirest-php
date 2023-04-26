@@ -1,0 +1,211 @@
+openapi: 3.0.0
+info:
+  title: API Rest chalenge pinnApp
+  version: 1.0.0
+  description: Esta api permite registrar clientes, como asi tambien, acceder a sus datos, kpis, listados.
+  Es necesario acceder al endpoint /authentication, con las credenciales correspondientes, para generar el token para
+  consumir el resto del API.
+
+servers:
+  - url: https://vuemoon.com/api/v1
+tags:
+  - name: Authentication
+  - name: Clientes
+paths:
+  /apirest-php/authentication:
+    post:
+      tags:
+      - Authentication
+      summary: Autenticar usuario
+      description: Autenticar un usuario y obtener un token JWT
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Nombre de usuario
+                password:
+                  type: string
+                  description: Contraseña del usuario
+      responses:
+        '200':
+          description: Respuesta satisfactoria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT generado
+        '403':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Usuario o contraseña incorrectos.
+
+    x-swagger-router-controller: Authentication
+
+  /apirest-php/creacliente:
+    post:
+      tags:
+      - Clientes
+      summary: Endpoint de creación de clientes
+      description: Crea un nuevo cliente en la base de datos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  example: 'michael'
+                apellido:
+                  type: string
+                  example: 'ovallez'
+                edad:
+                  type: integer
+                  example: 46
+                fecha_nacimiento:
+                  type: string
+                  example: '1976-05-29'
+              required:
+                - nombre
+                - apellido
+                - edad
+                - fecha_nacimiento
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    description: Mensaje de éxito indicando que el cliente ha sido creado
+                  cliente:
+                    type: object
+                    description: Datos del cliente creado
+                    properties:
+                      id:
+                        type: string
+                        description: Identificador del cliente
+                      nombre:
+                        type: string
+                        description: Nombre del cliente
+                      apellido:
+                        type: string
+                        description: Apellido del cliente
+                      edad:
+                        type: integer
+                        description: Edad del cliente
+                      fecha_nacimiento:
+                        type: string
+                        description: Fecha de nacimiento del cliente
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Token not provided.
+    x-swagger-router-controller: Clientes
+  /apirest-php/listclientes:
+    get:
+      tags:
+      - Clientes
+      summary: Listar clientes
+      description: Obtener la lista de clientes
+      parameters:
+        - name: Authorization
+          in: header
+          description: Token JWT generado en la autenticación
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Respuesta satisfactoria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: Identificador del cliente
+                    nombre:
+                      type: string
+                      description: Nombre del cliente
+                    apellido:
+                      type: string
+                      description: Apellido del cliente
+                    edad:
+                      type: integer
+                      description: Edad del cliente
+                    fecha_nacimiento:
+                      type: string
+                      description: Fecha de nacimiento del cliente (formato YYYY-MM-DD)
+                    fecha_probable_muerte:
+                      type: string
+                      description: Fecha probable de muerte del cliente (formato YYYY-MM-DD)
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Token not provided.
+    x-swagger-router-controller: Clientes
+  /apirest-php/kpideclientes:
+    get:
+      tags:
+      - Clientes
+      summary: Endpoint de estadísticas de clientes
+      description: Obtiene el promedio y la desviación estándar de las edades de los clientes registrados
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  promedio_edad:
+                    type: number
+                    description: Promedio de edad de los clientes registrados
+                  desviacion_estandar_edad:
+                    type: number
+                    description: Desviación estándar de las edades de los clientes registrados
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Token not provided.
+    x-swagger-router-controller: Clientes
